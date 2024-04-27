@@ -1,0 +1,102 @@
+blueprint:
+  name: Philips Hue Dimmer (ZHA)
+  description: Control lights with a Philips Hue Dimmer
+  domain: automation
+  input:
+    dimmer:
+      name: Philips Hue Dimmer
+      description: Philips Hue Dimmer
+      selector:
+        device:
+    entities:
+      name: Light entities
+      description: Light entities to control.
+      selector:
+        target:
+          entity:
+            domain: light
+
+trigger:
+  - device_id: !input dimmer
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: turn_on
+    id: turn_on
+  - device_id: !input dimmer
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: dim_up
+    id: dim_up_long
+  - device_id: !input dimmer
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: dim_down
+    id: dim_down_long
+  - device_id: !input dimmer
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: dim_down
+    id: dim_down
+  - device_id: !input dimmer
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: dim_up
+    id: dim_up
+
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - turn_on
+        sequence:
+          - service: light.toggle
+            target: !input entities
+            data:
+              transition: 1
+              brightness: 255
+      - conditions:
+          - condition: trigger
+            id:
+              - dim_up_long
+        sequence:
+          - service: light.turn_on
+            target: !input entities
+            data:
+              transition: 1
+              brightness_step_pct: 50
+      - conditions:
+          - condition: trigger
+            id:
+              - dim_down_long
+        sequence:
+          - service: light.turn_on
+            target: !input entities
+            data:
+              transition: 1
+              brightness_step_pct: -50
+      - conditions:
+          - condition: trigger
+            id:
+              - dim_up
+        sequence:
+          - service: light.turn_on
+            target: !input entities
+            data:
+              transition: 1
+              brightness_step_pct: 10
+      - conditions:
+          - condition: trigger
+            id:
+              - dim_down
+        sequence:
+          - service: light.turn_on
+            target: !input entities
+            data:
+              transition: 1
+              brightness_step_pct: -10
