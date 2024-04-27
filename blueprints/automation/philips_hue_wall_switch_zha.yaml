@@ -1,0 +1,38 @@
+blueprint:
+  name: Philips Hue Wall Switch (ZHA)
+  description: Control lights with a Philips Hue Wall Switch
+  domain: automation
+  input:
+    dimmer:
+      name: Philips Hue Wall Switch
+      description: Philips Hue Wall Switch
+      selector:
+        device:
+    entities:
+      name: Light entities
+      description: Light entities to control.
+      selector:
+        target:
+          entity:
+            domain: light
+
+trigger:
+  - device_id: !input dimmer
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: turn_on
+    id: turn_on
+
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - turn_on
+        sequence:
+          - service: light.toggle
+            target: !input entities
+            data:
+              transition: 1
+              brightness: 255
